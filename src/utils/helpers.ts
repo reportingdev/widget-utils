@@ -14,11 +14,29 @@ const convertPxToNumber = (value:string) =>{
     value = value.slice(0, -2)
   }
   return +value;
+}
 
+const generateDropdownValues = (data:WidgetData) => {
+  const { datasets,dimension } = data;
+
+  if (!datasets || datasets.length === 0) {
+    return [];
+  }
+
+  const labelsDataset = datasets[0].data;
+  const valuesDataset = dimension?.data ?? labelsDataset 
+
+  return labelsDataset.map((label, index) => {
+    return {
+      label: label,
+      value: valuesDataset[index]
+    };
+  });
 }
 
 export {
   containsAllZeros,
-  convertPxToNumber
+  convertPxToNumber,
+  generateDropdownValues
 };
 

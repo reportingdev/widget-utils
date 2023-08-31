@@ -1,8 +1,9 @@
 {
   "name": "@reportingdev/widget-utils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "This repo contains utility functions and components used across widget repos.",
   "scripts": {
+    "prebuild": "tsc",
     "build": "rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,6 +25,7 @@
     "README.md",
     "LICENSE"
   ],
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@reactflow/node-resizer": "^2.1.5",
