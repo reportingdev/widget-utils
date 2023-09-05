@@ -2,7 +2,7 @@
 import typescript from 'rollup-plugin-typescript2';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import css from 'rollup-plugin-css-only';  // Import the plugin
+import postcss from 'rollup-plugin-postcss';  // Import the plugin
 
 export default {
   input: 'src/index.ts',
@@ -25,6 +25,8 @@ export default {
     typescript(),
     resolve(),
     commonjs(),
-    css({ output: 'bundle.css' }),  // Add this line to include the plugin in the build process
+    postcss({
+      inject: true,  // Injects the styles directly into the JavaScript
+    }),
   ],
 };

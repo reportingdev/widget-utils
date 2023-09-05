@@ -51,12 +51,23 @@ const shorthandDates = (dateString:string) => {
     const day = date.getDate();
     const shortDate = `${month} ${day}`;
     return shortDate;
+};
+
+function formatCurrency(amount: number, currency:string="USD"): string {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+  });
+
+  return formatter.format(amount);
 }
+
 
 export {
   percentageFormatter,
   addCommasToNumber,
   abbreviateNumber,
   roundToTwo,
-  shorthandDates
+  shorthandDates,
+  formatCurrency
 };

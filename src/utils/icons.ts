@@ -243,7 +243,7 @@ const getIcon = (icon: string, format:IconFormat = 'solid'): any => {
   }
 
   // Return a component that conforms to the HeroIcon type
-  return MyIcon
+  return MyIcon;
 }
 
 

@@ -4,19 +4,29 @@ import './loading.css';
 import { datasetGenerator } from '../../utils/generators';
 import { Oval as Loader } from 'svg-loaders-react'
 
+//type LoaderVariant = 'spinner' | 'bar' | 'circle';
+
+interface LoaderProps {
+  //variant?: LoaderVariant;
+  color?: string;
+  // other props
+}
+
 /**
  * Primary UI component for user interaction
  */
-export const LoadingView = ({ ...props }) => {
+export const LoadingView = ({ color }:LoaderProps) => {
   const loaderStyle = {
     position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)"
   };
+
+
   return (
     <div className='loading-overlay'>
-      <Loader style={loaderStyle} stroke="#6B7280" className=''></Loader>
+      <Loader style={loaderStyle} stroke={color} className=''></Loader>
     </div>
   );
 };
@@ -40,5 +50,5 @@ LoadingView.propTypes = {
 };
 
 LoadingView.defaultProps = {
-
+  color: '#6B7280'
 };
