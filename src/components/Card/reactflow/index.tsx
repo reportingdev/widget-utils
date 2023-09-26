@@ -15,11 +15,12 @@ const getId = () => {
 type Props = {
     Component: JSX.Element;
     args: Record<string, any>
+    widgetConfig?: Record<string, any>
 }
 
 // Created different wrapper because on moving widgets it was changing the args
 // because of that the component was going to inifinty loop
-const ReactFlowWrapper: FC<Props> = ({Component, args}) => {
+const ReactFlowWrapper: FC<Props> = ({Component, args, widgetConfig}) => {
     const gap = 12;
 
     const dashboardWidth = 960;
@@ -43,6 +44,7 @@ const ReactFlowWrapper: FC<Props> = ({Component, args}) => {
             data: {
                 args,
                 Component,
+                widgetConfig,
             },
             deletable: true,
             selected: false,
@@ -107,10 +109,11 @@ const ReactFlowWrapper: FC<Props> = ({Component, args}) => {
     );
 }
 
-const WidgetWrapper = (Component: any, args: Record<string, any>) => {
+const WidgetWrapper = (Component: any, args: Props['args'], widgetConfig: Props['widgetConfig'] = {}) => {
     return <ReactFlowWrapper
         Component={Component}
         args={args}
+        widgetConfig={widgetConfig}
     />
 };
 
