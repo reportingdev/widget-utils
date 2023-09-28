@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const WidgetCardNode = memo((props: Props) => {
-  const { Component, args, widgetConfig } = props.data
+  const { Component, args } = props.data
   const { minHeight, minWidth } = props;
   
   return (
