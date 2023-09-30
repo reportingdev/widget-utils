@@ -55,8 +55,8 @@ const shorthandDates = (dateString:string) => {
     return shortDate;
 };
 
-type SupportedLocales = 'en-US' | 'en-GB' | 'es' | 'fr' | 'de' | 'it' | 'nl' | 'ru' | 'zh-CN' | 'ja' | 'ko' | 'ar' | 'hi' | 'pt' | 'sv';
-type SupportedCurrencies = 'USD' | 'GPB' | 'EUR' | 'CNY' | 'JPY' | 'KRW' | 'INR' | 'SEK';
+export type SupportedLocales = 'en-US' | 'en-GB' | 'es' | 'fr' | 'de' | 'it' | 'nl' | 'ru' | 'zh-CN' | 'ja' | 'ko' | 'ar' | 'hi' | 'pt' | 'sv';
+export type SupportedCurrencies = 'USD' | 'GPB' | 'EUR' | 'CNY' | 'JPY' | 'KRW' | 'INR' | 'SEK';
 
 function formatCurrency(amount: number, currency:SupportedCurrencies="USD", locale:SupportedLocales='en-US'): string {
   const formatter = new Intl.NumberFormat(locale, {
@@ -67,9 +67,9 @@ function formatCurrency(amount: number, currency:SupportedCurrencies="USD", loca
   return formatter.format(amount);
 }
 
-type DateFormat = 'localized' | 'us' | 'us-short' | 'european' | 'european-short' | 'asian';
+export type DateFormat = 'default' | 'shortMonthDay' | 'shortMonthDayYear' |'longMonthDay' | 'longMonthDayYear' | 'us' | 'european' | 'asian';
 
-function formatDate(date:Date | string, locale:SupportedLocales='en-US', dateFormat:DateFormat='localized'):string {
+function formatDate(date:Date | string, dateFormat:DateFormat='default', locale:SupportedLocales='en-US'):string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const localeMap = {
     'en-US': enUS,
@@ -90,18 +90,24 @@ function formatDate(date:Date | string, locale:SupportedLocales='en-US', dateFor
   };
 
   switch (dateFormat) {
-    case 'localized':
+    case 'default':
       return format(dateObj, 'PP', { locale: localeMap[locale] ?? enUS });
     case 'us':
       return format(dateObj, 'MM/dd/yyyy');
     case 'european':
       return format(dateObj, 'dd/MM/yyyy');
-    case 'us-short':
-      return format(dateObj, 'MM/dd');
-    case 'european-short':
-      return format(dateObj, 'dd/MM');
     case 'asian':
       return format(dateObj, 'yyyy/MM/dd');
+    case 'shortMonthDay':
+    case 'shortMonthDayYear':
+    case 'longMonthDay':
+    case 'longMonthDayYear':
+      let options: Intl.DateTimeFormatOptions = {};
+      if (dateFormat.includes('shortMonth')) options.month = 'short';
+      if (dateFormat.includes('longMonth')) options.month = 'long';
+      if (dateFormat.includes('Day')) options.day = 'numeric';
+      if (dateFormat.includes('Year')) options.year = 'numeric';
+      return dateObj.toLocaleDateString(locale, options);
     default:
       return format(dateObj, 'PP', { locale: localeMap[locale] ?? enUS });
   }
