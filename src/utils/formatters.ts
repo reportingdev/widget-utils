@@ -69,8 +69,7 @@ function formatCurrency(amount: number, currency:SupportedCurrencies="USD", loca
 
 export type DateFormat = 'default' | 'shortMonthDay' | 'shortMonthDayYear' |'longMonthDay' | 'longMonthDayYear' | 'us' | 'european' | 'asian';
 
-function formatDate(date:Date | string, dateFormat:DateFormat='default', locale:SupportedLocales='en-US'):string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+function getDateFNSLocale(locale:SupportedLocales) {
   const localeMap = {
     'en-US': enUS,
     'en-GB': enGB,
@@ -89,9 +88,17 @@ function formatDate(date:Date | string, dateFormat:DateFormat='default', locale:
     'sv': sv,
   };
 
+  return localeMap[locale] ?? enUS;
+}
+
+function formatDate(date:Date | string, dateFormat:DateFormat='default', locale:SupportedLocales='en-US'):string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+  const dateFNSLocale = getDateFNSLocale(locale);
+
   switch (dateFormat) {
     case 'default':
-      return format(dateObj, 'PP', { locale: localeMap[locale] ?? enUS });
+      return format(dateObj, 'PP', { locale: dateFNSLocale });
     case 'us':
       return format(dateObj, 'MM/dd/yyyy');
     case 'european':
@@ -109,7 +116,7 @@ function formatDate(date:Date | string, dateFormat:DateFormat='default', locale:
       if (dateFormat.includes('Year')) options.year = 'numeric';
       return dateObj.toLocaleDateString(locale, options);
     default:
-      return format(dateObj, 'PP', { locale: localeMap[locale] ?? enUS });
+      return format(dateObj, 'PP', { locale: dateFNSLocale });
   }
 }
 
@@ -122,4 +129,5 @@ export {
   shorthandDates,
   formatCurrency,
   formatDate,
+  getDateFNSLocale,
 };
