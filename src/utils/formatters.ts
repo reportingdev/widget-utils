@@ -1,4 +1,6 @@
 import { isFinite } from "lodash";
+import { enUS, enGB,es,fr,de,it,nl,ru,zhCN,ja,ko,ar,hi,pt,sv } from 'date-fns/locale';
+import {format} from 'date-fns'
 
 const percentageFormatter = (value:number) => {
   
@@ -53,13 +55,62 @@ const shorthandDates = (dateString:string) => {
     return shortDate;
 };
 
-function formatCurrency(amount: number, currency:string="USD"): string {
-  const formatter = new Intl.NumberFormat('en-US', {
+export type SupportedLocales = 'en-US' | 'en-GB' | 'es' | 'fr' | 'de' | 'it' | 'nl' | 'ru' | 'zh-CN' | 'ja' | 'ko' | 'ar' | 'hi' | 'pt' | 'sv';
+export type SupportedCurrencies = 'USD' | 'GPB' | 'EUR' | 'CNY' | 'JPY' | 'KRW' | 'INR' | 'SEK';
+
+function formatCurrency(amount: number, currency:SupportedCurrencies="USD", locale:SupportedLocales='en-US'): string {
+  const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
   });
 
   return formatter.format(amount);
+}
+
+export type DateFormat = 'default' | 'shortMonthDay' | 'shortMonthDayYear' |'longMonthDay' | 'longMonthDayYear' | 'us' | 'european' | 'asian';
+
+function formatDate(date:Date | string, dateFormat:DateFormat='default', locale:SupportedLocales='en-US'):string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const localeMap = {
+    'en-US': enUS,
+    'en-GB': enGB,
+    'es': es,
+    'fr': fr,
+    'de': de,
+    'it': it,
+    'nl': nl,
+    'ru': ru,
+    'zh-CN': zhCN,
+    'ja': ja,
+    'ko': ko,
+    'ar': ar,
+    'hi': hi,
+    'pt': pt,
+    'sv': sv,
+  };
+
+  switch (dateFormat) {
+    case 'default':
+      return format(dateObj, 'PP', { locale: localeMap[locale] ?? enUS });
+    case 'us':
+      return format(dateObj, 'MM/dd/yyyy');
+    case 'european':
+      return format(dateObj, 'dd/MM/yyyy');
+    case 'asian':
+      return format(dateObj, 'yyyy/MM/dd');
+    case 'shortMonthDay':
+    case 'shortMonthDayYear':
+    case 'longMonthDay':
+    case 'longMonthDayYear':
+      let options: Intl.DateTimeFormatOptions = {};
+      if (dateFormat.includes('shortMonth')) options.month = 'short';
+      if (dateFormat.includes('longMonth')) options.month = 'long';
+      if (dateFormat.includes('Day')) options.day = 'numeric';
+      if (dateFormat.includes('Year')) options.year = 'numeric';
+      return dateObj.toLocaleDateString(locale, options);
+    default:
+      return format(dateObj, 'PP', { locale: localeMap[locale] ?? enUS });
+  }
 }
 
 
@@ -69,5 +120,6 @@ export {
   abbreviateNumber,
   roundToTwo,
   shorthandDates,
-  formatCurrency
+  formatCurrency,
+  formatDate,
 };
