@@ -67,46 +67,6 @@ function formatCurrency(amount: number, currency:SupportedCurrencies="USD", loca
   return formatter.format(amount);
 }
 
-type ParsedCurrency = {
-  amount: number;
-  currencyCode: SupportedCurrencies;
-};
-
-function parseCurrencyString(currencyString: string):ParsedCurrency | null {
-  // Using regex to capture amount and currency symbol
-  const regex = /([^\d]*)([\d.,]+)/;
-  const matches = currencyString.match(regex);
-  
-  if (!matches) return null;
-
-  const [, currencySymbol, amountString] = matches;
-
-  // Remove commas and convert string to number
-  const amount = parseFloat(amountString.replace(/,/g, ''));
-
-  // Mapping currency symbols to currency codes
-  const symbolToCode: { [key: string]: string } = {
-    '$': 'USD',
-    '£': 'GBP',
-    '€': 'EUR',
-    '¥': 'JPY',
-    'CY¥': 'JPY',
-    '₩': 'KRW',
-    '₽': 'RUB',
-    '₹': 'INR',
-    'R$': 'BRL',
-    'SEK': 'SEK',
-    // Add more mappings as needed
-  };
-
-  const currencyCode = symbolToCode[currencySymbol.trim()] || 'Unknown';
-
-  return {
-    amount,
-    currencyCode,
-  };
-};
-
 type DateFormat = 'localized' | 'us' | 'us-short' | 'european' | 'european-short' | 'asian';
 
 function formatDate(date:Date | string, locale:SupportedLocales='en-US', dateFormat:DateFormat='localized'):string {
@@ -156,5 +116,4 @@ export {
   shorthandDates,
   formatCurrency,
   formatDate,
-  parseCurrencyString
 };
