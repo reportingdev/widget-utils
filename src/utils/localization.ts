@@ -1,9 +1,9 @@
 import { enUS, enGB, es, fr, de, it, nl, ru, zhCN, ja, ko, ar, hi, pt, sv } from 'date-fns/locale';
-import { Locale, format } from 'date-fns'
+import { Locale, format, startOfWeek } from 'date-fns'
 
-const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'es', 'fr', 'de', 'it', 'nl', 'ru', 'zh-CN', 'ja', 'ko', 'ar', 'hi','pt', 'sv'];
-const SUPPORTED_CURRENCIES = ['USD', 'GPB' , 'EUR' , 'CNY' , 'JPY' , 'KRW' , 'INR' , 'SEK'];
-const SUPPORTED_DATE_FORMATS = ['default' , 'shortMonthDay' , 'shortMonthDayYear' , 'longMonthDay' , 'longMonthDayYear' , 'us' , 'european' , 'asian'];
+const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'es', 'fr', 'de', 'it', 'nl', 'ru', 'zh-CN', 'ja', 'ko', 'ar', 'hi', 'pt', 'sv'];
+const SUPPORTED_CURRENCIES = ['USD', 'GPB', 'EUR', 'CNY', 'JPY', 'KRW', 'INR', 'SEK'];
+const SUPPORTED_DATE_FORMATS = ['default', 'shortMonthDay', 'shortMonthDayYear', 'longMonthDay', 'longMonthDayYear', 'us', 'european', 'asian'];
 
 export type SupportedLocales = typeof SUPPORTED_LOCALES[number];
 export type SupportedCurrencies = typeof SUPPORTED_CURRENCIES[number];
@@ -29,8 +29,14 @@ export function formatCurrency(amount: number, currency: SupportedCurrencies = "
   return formatter.format(amount);
 }
 
-export function getDateFNSLocale(locale: SupportedLocales):Locale {
-  const localeMap:Record<SupportedLocales, Locale> = {
+export function getFirstDayOfWeek(locale: SupportedLocales): number {
+  const now = new Date();
+  const start = startOfWeek(now, { locale: getDateFNSLocale(locale) });
+  return start.getDay();  // Returns 0 for Sunday, 1 for Monday, etc.
+}
+
+export function getDateFNSLocale(locale: SupportedLocales): Locale {
+  const localeMap: Record<SupportedLocales, Locale> = {
     'en-US': enUS,
     'en-GB': enGB,
     'es': es,
@@ -83,7 +89,7 @@ export function formatDate(date: Date | string, dateFormat: DateFormat = 'defaul
 export const localizationOptions = {
   currency: {
     options: SUPPORTED_CURRENCIES,
-    control: {type: "select"},
+    control: { type: "select" },
     description: 'The currency format to be used when data is a currency.',
     table: {
       category: "Localization"
@@ -91,7 +97,7 @@ export const localizationOptions = {
   },
   dateFormat: {
     options: SUPPORTED_DATE_FORMATS,
-    control: {type: 'select'},
+    control: { type: 'select' },
     description: 'How to format dates within the widget. Default is based on provided locale.',
     table: {
       category: "Localization"

@@ -1,6 +1,6 @@
 {
   "name": "@reportingdev/widget-utils",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "This repo contains utility functions and components used across widget repos.",
   "scripts": {
     "prebuild": "tsc",
