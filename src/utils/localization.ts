@@ -2,7 +2,7 @@ import { enUS, enGB, es, fr, de, it, nl, ru, zhCN, ja, ko, ar, hi, pt, sv } from
 import { Locale, format, startOfWeek,subDays,startOfQuarter,startOfYear,startOfMonth,subMonths,subYears,endOfMonth,endOfQuarter,subQuarters,endOfYear } from 'date-fns'
 
 const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'es', 'fr', 'de', 'it', 'nl', 'ru', 'zh-CN', 'ja', 'ko', 'ar', 'hi', 'pt', 'sv'];
-const SUPPORTED_CURRENCIES = ['USD', 'GPB', 'EUR', 'CNY', 'JPY', 'KRW', 'INR', 'SEK'];
+const SUPPORTED_CURRENCIES = ['USD', 'GBP', 'EUR', 'CNY', 'JPY', 'KRW', 'INR', 'SEK'];
 const SUPPORTED_DATE_FORMATS = ['default', 'shortMonthDay', 'shortMonthDayYear', 'longMonthDay', 'longMonthDayYear', 'us', 'european', 'asian'];
 
 export type SupportedLocales = typeof SUPPORTED_LOCALES[number];
@@ -20,6 +20,23 @@ export const shorthandDates = (dateString: string) => {
   return shortDate;
 };
 
+
+/**
+ * Formats a given numerical amount into its currency representation based on specified parameters.
+ * This function supports abbreviations like 'k', 'M', 'B', and 'T' for large numbers.
+ *
+ * @export
+ * @param {number} amount - The numerical amount to be formatted.
+ * @param {SupportedCurrencies} [currency="USD"] - The currency in which the amount will be displayed.
+ * @param {SupportedLocales} [locale='en-US'] - The locale to use for currency formatting.
+ * @param {boolean} [shouldAbbreviate=false] - Determines if large numbers should be abbreviated.
+ * @returns {string} - The formatted currency string.
+ *
+ * @example
+ * formatCurrency(1200, "USD", "en-US", false);  // "$1,200"
+ * formatCurrency(1200, "USD", "en-US", true);   // "$1.2k"
+ * formatCurrency(1200000, "EUR", "de", true); // "1,2M €"
+ */
 export function formatCurrency(amount: number, currency: SupportedCurrencies = "USD", locale: SupportedLocales = 'en-US',shouldAbbreviate: boolean=false): string {
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -34,7 +51,7 @@ export function formatCurrency(amount: number, currency: SupportedCurrencies = "
     return removeTrailingZeros(formatter.format(amount));
   }
   
-  const currencyParts = formatter.formatToParts(0);
+  const currencyParts = formatter.formatToParts(1);
   const currencySymbol = currencyParts.find(part => part.type === 'currency')?.value || '';
   const isSymbolFirst = currencyParts[0]?.type === 'currency';
 
@@ -65,10 +82,25 @@ export function formatCurrency(amount: number, currency: SupportedCurrencies = "
   }
 
   return isSymbolFirst ? 
-    `${currencySymbol} ${formattedAmount}${suffix}` : 
+    `${currencySymbol}${formattedAmount}${suffix}` : 
     `${formattedAmount}${suffix} ${currencySymbol}`;
 }
 
+/**
+ * Formats a given number based on the locale and optionally abbreviates it.
+ * Supports abbreviations like 'K', 'M', 'B', and 'T' for large numbers.
+ *
+ * @export
+ * @param {number} num - The numerical value to be formatted.
+ * @param {SupportedLocales} [locale='en-US'] - The locale to use for number formatting.
+ * @param {boolean} [shouldAbbreviate=false] - Determines if large numbers should be abbreviated.
+ * @returns {string} - The formatted number string.
+ *
+ * @example
+ * formatNumberByLocale(1200, 'en-US', false);  // "1,200"
+ * formatNumberByLocale(1200, 'en-US', true);   // "1.2K"
+ * formatNumberByLocale(1200000, 'de-DE', true); // "1,2M"
+ */
 export function formatNumberByLocale(
   num: number, 
   locale: SupportedLocales = 'en-US', 
@@ -106,12 +138,37 @@ export function formatNumberByLocale(
 }
 
 type dayOfWeekIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+/**
+ * Retrieves the index of the first day of the week based on a given locale.
+ * The index starts from 0, where 0 represents Sunday, 1 represents Monday, etc.
+ *
+ * @export
+ * @param {SupportedLocales} locale - The locale identifier.
+ * @returns {dayOfWeekIndex} - The index of the first day of the week based on the locale.
+ *
+ * @example
+ * getFirstDayOfWeek('en-US'); // Returns 0 (Sunday)
+ * getFirstDayOfWeek('fr');    // Returns 1 (Monday)
+ */
 export function getFirstDayOfWeek(locale: SupportedLocales): dayOfWeekIndex {
   const now = new Date();
   const start = startOfWeek(now, { locale: getDateFNSLocale(locale) });
   return start.getDay() as dayOfWeekIndex;  // Returns 0 for Sunday, 1 for Monday, etc.
 }
 
+
+/**
+ * Retrieves the appropriate Locale object for date-fns based on the given locale string.
+ *
+ * @export
+ * @param {SupportedLocales} locale - The locale identifier to be converted to a Locale object.
+ * @returns {Locale} - The Locale object corresponding to the given locale.
+ *
+ * @example
+ * getDateFNSLocale('en-US'); // Returns enUS Locale object
+ * getDateFNSLocale('fr');    // Returns fr Locale object
+ * getDateFNSLocale('xx');    // Returns enUS Locale object (fallback)
+ */
 export function getDateFNSLocale(locale: SupportedLocales): Locale {
   const localeMap: Record<SupportedLocales, Locale> = {
     'en-US': enUS,
@@ -134,6 +191,22 @@ export function getDateFNSLocale(locale: SupportedLocales): Locale {
   return localeMap[locale] ?? enUS;
 }
 
+/**
+ * Formats a given date based on the specified date format and locale.
+ * Supports multiple date formats like 'default', 'us', 'european', 'asian', etc.
+ *
+ * @export
+ * @param {Date | string} date - The date to be formatted, can be a Date object or a string representation of a date.
+ * @param {DateFormat} [dateFormat='default'] - The format in which the date will be displayed.
+ * @param {SupportedLocales} [locale='en-US'] - The locale to use for date formatting.
+ * @returns {string} - The formatted date string.
+ *
+ * @example
+ * formatDate(new Date(), 'default', 'en-US');  // "October 1, 2023"
+ * formatDate('2023-10-01', 'us', 'en-US');     // "10/01/2023"
+ * formatDate(new Date(), 'european', 'de-DE'); // "01/10/2023"
+ * formatDate(new Date(), 'asian', 'zh-CN');    // "2023/10/01"
+ */
 export function formatDate(date: Date | string, dateFormat: DateFormat = 'default', locale: SupportedLocales = 'en-US'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
@@ -206,6 +279,21 @@ interface DateRange {
   from: Date;
   to: Date;
 }
+
+/**
+ * Gets a date range based on a specified option.
+ * Supports various predefined date ranges like 'last7Days', 'last30Days', 'lastWeek', etc.
+ *
+ * @export
+ * @param {DateRangeOptions} option - The predefined option to calculate the date range.
+ * @param {boolean} enableToday - Determines if 'today' should be included in the 'to' date.
+ * @returns {DateRange} - An object containing the 'from' and 'to' dates for the selected range.
+ *
+ * @example
+ * getDateRange('last7Days', true);  // { from: "2023-09-25T00:00:00.000Z", to: "2023-10-01T00:00:00.000Z" }
+ * getDateRange('lastWeek', false);  // { from: "2023-09-18T00:00:00.000Z", to: "2023-09-24T00:00:00.000Z" }
+ * getDateRange('lastYear', false);  // { from: "2022-01-01T00:00:00.000Z", to: "2022-12-31T00:00:00.000Z" }
+ */
 export const getDateRange = (option: DateRangeOptions, enableToday: boolean): DateRange => {
   const today = new Date();
   let to = enableToday ? new Date(today) : subDays(today, 1);
@@ -408,6 +496,17 @@ export const getLocalizedDateRangeSelectorText = (option:DateRangeOptions, local
   return dateRangeSelectText?.[locale]?.[option] ?? dateRangeSelectText['en-US']?.[option] ?? 'unknown';
 }
 
+/**
+ * Checks if an array of dates spans across multiple years.
+ *
+ * @export
+ * @param {string[]|Date[]} dates - An array of date objects or date strings to check.
+ * @returns {boolean} - Returns `true` if the dates span multiple years, otherwise `false`.
+ *
+ * @example
+ * hasMultipleYears(['2023-01-01', '2024-01-01']);  // true
+ * hasMultipleYears([new Date('2023-01-01'), new Date('2023-12-31')]);  // false
+ */
 export const hasMultipleYears = (dates: string[]|Date[]): boolean => {
   // Extract years from the dates
   const years = dates.map((date) => new Date(date).getUTCFullYear());
