@@ -331,3 +331,14 @@ const dateRangeSelectText:Record<SupportedLocales, DateRangeTexts> = {
 export const getLocalizedDateRangeSelectorText = (option:DateRangeOptions, locale:SupportedLocales='en-US') => {
   return dateRangeSelectText?.[locale]?.[option] ?? dateRangeSelectText['en-US']?.[option] ?? 'unknown';
 }
+
+export const hasMultipleYears = (dates: string[]|Date[]): boolean => {
+  // Extract years from the dates
+  const years = dates.map((date) => new Date(date).getUTCFullYear());
+
+  // Find the unique years using a Set
+  const uniqueYears = new Set(years);
+
+  // Check if there are multiple unique years
+  return uniqueYears.size > 1;
+};
