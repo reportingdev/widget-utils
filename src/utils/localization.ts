@@ -20,37 +20,90 @@ export const shorthandDates = (dateString: string) => {
   return shortDate;
 };
 
-export function formatCurrency(amount: number, currency: SupportedCurrencies = "USD", locale: SupportedLocales = 'en-US'): string {
+export function formatCurrency(amount: number, currency: SupportedCurrencies = "USD", locale: SupportedLocales = 'en-US',shouldAbbreviate: boolean=false): string {
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
   });
 
-  return formatter.format(amount);
+  const removeTrailingZeros = (formattedCurrency:string) => {
+    return formattedCurrency.replace(/(\.00|,00)(?=\s*[^0-9]|$)/g, '');
+  }
+
+  if (!shouldAbbreviate) {
+    return removeTrailingZeros(formatter.format(amount));
+  }
+  
+  const currencyParts = formatter.formatToParts(0);
+  const currencySymbol = currencyParts.find(part => part.type === 'currency')?.value || '';
+  const isSymbolFirst = currencyParts[0]?.type === 'currency';
+
+  let formattedAmount: string;
+
+  let divisor = 1;
+  let suffix = '';
+
+  if (amount >= 1_000_000_000_000) {
+    divisor = 1_000_000_000_000;
+    suffix = 'T';
+  } else if (amount >= 1_000_000_000) {
+    divisor = 1_000_000_000;
+    suffix = 'B';
+  } else if (amount >= 1_000_000) {
+    divisor = 1_000_000;
+    suffix = 'M';
+  } else if (amount >= 1_000) {
+    divisor = 1_000;
+    suffix = 'k';
+  }
+
+  // Check if number is evenly divisible by the various thresholds
+  if (amount % divisor === 0 || amount % (divisor / 10) === 0 || amount % (divisor / 100) === 0) {
+    formattedAmount = (amount / divisor).toLocaleString(locale);
+  } else {
+    return removeTrailingZeros(formatter.format(amount));
+  }
+
+  return isSymbolFirst ? 
+    `${currencySymbol} ${formattedAmount}${suffix}` : 
+    `${formattedAmount}${suffix} ${currencySymbol}`;
 }
 
-export const formatNumberByLocale = (num: number, locale: SupportedLocales = 'en-US'): string => {
-  // For numbers less than 1000, use the native locale string
-  if (num < 1000) {
+export function formatNumberByLocale(
+  num: number, 
+  locale: SupportedLocales = 'en-US', 
+  shouldAbbreviate: boolean = false
+): string {
+  if (num < 1000 || !shouldAbbreviate) {
     return num.toLocaleString(locale);
   }
 
-  // For numbers greater than or equal to 1000, abbreviate
   let abbr: string;
-  let value: number;
+  let divisor: number;
 
-  if (num >= 1000000) {
+  if (num >= 1_000_000_000_000) {
+    abbr = 'T';
+    divisor = 1_000_000_000_000;
+  } else if (num >= 1000000000) {
+    abbr = 'B';
+    divisor = 1000000000;
+  } else if (num >= 1000000) {
     abbr = 'M';
-    value = num / 1000000;
+    divisor = 1000000;
   } else {
     abbr = 'K';
-    value = num / 1000;
+    divisor = 1000;
   }
 
-  // Format the number to one decimal place and add abbreviation
-  const formattedNumber = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
-  return `${formattedNumber}${abbr}`;
-};
+  // Check if number is evenly divisible by the various thresholds
+  if (num % divisor === 0 || num % (divisor / 10) === 0 || num % (divisor / 100) === 0) {
+    const value = num / divisor;
+    return `${value.toLocaleString(locale)}${abbr}`;
+  }
+
+  // If not, then don't abbreviate
+  return num.toLocaleString(locale);
+}
 
 type dayOfWeekIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export function getFirstDayOfWeek(locale: SupportedLocales): dayOfWeekIndex {
