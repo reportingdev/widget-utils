@@ -29,6 +29,29 @@ export function formatCurrency(amount: number, currency: SupportedCurrencies = "
   return formatter.format(amount);
 }
 
+export const formatNumberByLocale = (num: number, locale: SupportedLocales = 'en-US'): string => {
+  // For numbers less than 1000, use the native locale string
+  if (num < 1000) {
+    return num.toLocaleString(locale);
+  }
+
+  // For numbers greater than or equal to 1000, abbreviate
+  let abbr: string;
+  let value: number;
+
+  if (num >= 1000000) {
+    abbr = 'M';
+    value = num / 1000000;
+  } else {
+    abbr = 'K';
+    value = num / 1000;
+  }
+
+  // Format the number to one decimal place and add abbreviation
+  const formattedNumber = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
+  return `${formattedNumber}${abbr}`;
+};
+
 type dayOfWeekIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export function getFirstDayOfWeek(locale: SupportedLocales): dayOfWeekIndex {
   const now = new Date();
