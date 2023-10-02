@@ -4,10 +4,13 @@ import { Locale, format, startOfWeek,subDays,startOfQuarter,startOfYear,startOfM
 const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'es', 'fr', 'de', 'it', 'nl', 'ru', 'zh-CN', 'ja', 'ko', 'ar', 'hi', 'pt', 'sv'];
 const SUPPORTED_CURRENCIES = ['USD', 'GBP', 'EUR', 'CNY', 'JPY', 'KRW', 'INR', 'SEK'];
 const SUPPORTED_DATE_FORMATS = ['default', 'shortMonthDay', 'shortMonthDayYear', 'longMonthDay', 'longMonthDayYear', 'us', 'european', 'asian'];
+const SUPPORTED_VALUE_FORMATS = ['none', 'localized', 'abbreviated', 'currency']
 
-export type SupportedLocales = typeof SUPPORTED_LOCALES[number];
-export type SupportedCurrencies = typeof SUPPORTED_CURRENCIES[number];
+export type SupportedLocale = typeof SUPPORTED_LOCALES[number];
+export type SupportedCurrency = typeof SUPPORTED_CURRENCIES[number];
 export type DateFormat = typeof SUPPORTED_DATE_FORMATS[number];
+export type ValueFormat = typeof SUPPORTED_VALUE_FORMATS[number];
+export type ValueFormatter = (value: number) => string;
 
 /**
  * @deprecated Use `formatDate` instead.
@@ -27,8 +30,8 @@ export const shorthandDates = (dateString: string) => {
  *
  * @export
  * @param {number} amount - The numerical amount to be formatted.
- * @param {SupportedCurrencies} [currency="USD"] - The currency in which the amount will be displayed.
- * @param {SupportedLocales} [locale='en-US'] - The locale to use for currency formatting.
+ * @param {SupportedCurrency} [currency="USD"] - The currency in which the amount will be displayed.
+ * @param {SupportedLocale} [locale='en-US'] - The locale to use for currency formatting.
  * @param {boolean} [shouldAbbreviate=false] - Determines if large numbers should be abbreviated.
  * @returns {string} - The formatted currency string.
  *
@@ -37,7 +40,7 @@ export const shorthandDates = (dateString: string) => {
  * formatCurrency(1200, "USD", "en-US", true);   // "$1.2k"
  * formatCurrency(1200000, "EUR", "de", true); // "1,2M €"
  */
-export function formatCurrency(amount: number, currency: SupportedCurrencies = "USD", locale: SupportedLocales = 'en-US',shouldAbbreviate: boolean=false): string {
+export function formatCurrency(amount: number, currency: SupportedCurrency = "USD", locale: SupportedLocale = 'en-US',shouldAbbreviate: boolean=false): string {
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
@@ -92,7 +95,7 @@ export function formatCurrency(amount: number, currency: SupportedCurrencies = "
  *
  * @export
  * @param {number} num - The numerical value to be formatted.
- * @param {SupportedLocales} [locale='en-US'] - The locale to use for number formatting.
+ * @param {SupportedLocale} [locale='en-US'] - The locale to use for number formatting.
  * @param {boolean} [shouldAbbreviate=false] - Determines if large numbers should be abbreviated.
  * @returns {string} - The formatted number string.
  *
@@ -103,7 +106,7 @@ export function formatCurrency(amount: number, currency: SupportedCurrencies = "
  */
 export function formatNumberByLocale(
   num: number, 
-  locale: SupportedLocales = 'en-US', 
+  locale: SupportedLocale = 'en-US', 
   shouldAbbreviate: boolean = false
 ): string {
   if (num < 1000 || !shouldAbbreviate) {
@@ -143,14 +146,14 @@ type dayOfWeekIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
  * The index starts from 0, where 0 represents Sunday, 1 represents Monday, etc.
  *
  * @export
- * @param {SupportedLocales} locale - The locale identifier.
+ * @param {SupportedLocale} locale - The locale identifier.
  * @returns {dayOfWeekIndex} - The index of the first day of the week based on the locale.
  *
  * @example
  * getFirstDayOfWeek('en-US'); // Returns 0 (Sunday)
  * getFirstDayOfWeek('fr');    // Returns 1 (Monday)
  */
-export function getFirstDayOfWeek(locale: SupportedLocales): dayOfWeekIndex {
+export function getFirstDayOfWeek(locale: SupportedLocale): dayOfWeekIndex {
   const now = new Date();
   const start = startOfWeek(now, { locale: getDateFNSLocale(locale) });
   return start.getDay() as dayOfWeekIndex;  // Returns 0 for Sunday, 1 for Monday, etc.
@@ -161,7 +164,7 @@ export function getFirstDayOfWeek(locale: SupportedLocales): dayOfWeekIndex {
  * Retrieves the appropriate Locale object for date-fns based on the given locale string.
  *
  * @export
- * @param {SupportedLocales} locale - The locale identifier to be converted to a Locale object.
+ * @param {SupportedLocale} locale - The locale identifier to be converted to a Locale object.
  * @returns {Locale} - The Locale object corresponding to the given locale.
  *
  * @example
@@ -169,8 +172,8 @@ export function getFirstDayOfWeek(locale: SupportedLocales): dayOfWeekIndex {
  * getDateFNSLocale('fr');    // Returns fr Locale object
  * getDateFNSLocale('xx');    // Returns enUS Locale object (fallback)
  */
-export function getDateFNSLocale(locale: SupportedLocales): Locale {
-  const localeMap: Record<SupportedLocales, Locale> = {
+export function getDateFNSLocale(locale: SupportedLocale): Locale {
+  const localeMap: Record<SupportedLocale, Locale> = {
     'en-US': enUS,
     'en-GB': enGB,
     'es': es,
@@ -198,7 +201,7 @@ export function getDateFNSLocale(locale: SupportedLocales): Locale {
  * @export
  * @param {Date | string} date - The date to be formatted, can be a Date object or a string representation of a date.
  * @param {DateFormat} [dateFormat='default'] - The format in which the date will be displayed.
- * @param {SupportedLocales} [locale='en-US'] - The locale to use for date formatting.
+ * @param {SupportedLocale} [locale='en-US'] - The locale to use for date formatting.
  * @returns {string} - The formatted date string.
  *
  * @example
@@ -207,7 +210,7 @@ export function getDateFNSLocale(locale: SupportedLocales): Locale {
  * formatDate(new Date(), 'european', 'de-DE'); // "01/10/2023"
  * formatDate(new Date(), 'asian', 'zh-CN');    // "2023/10/01"
  */
-export function formatDate(date: Date | string, dateFormat: DateFormat = 'default', locale: SupportedLocales = 'en-US'): string {
+export function formatDate(date: Date | string, dateFormat: DateFormat = 'default', locale: SupportedLocale = 'en-US'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
   const dateFNSLocale = getDateFNSLocale(locale);
@@ -237,6 +240,14 @@ export function formatDate(date: Date | string, dateFormat: DateFormat = 'defaul
 }
 
 export const localizationOptions = {
+  locale: {
+    options: SUPPORTED_LOCALES,
+    control: { type: "select" },
+    description: 'The locale to be used within the widget. Changes how dates and currencies are rendered.',
+    table: {
+      category: "Localization"
+    }
+  },
   currency: {
     options: SUPPORTED_CURRENCIES,
     control: { type: "select" },
@@ -244,6 +255,14 @@ export const localizationOptions = {
     table: {
       category: "Localization"
     }
+  },
+  valueFormat: {
+    options: SUPPORTED_VALUE_FORMATS,
+    control: {type: 'select'},
+    description: "Controls the format of the x-axis values.",
+    table: {
+      category: "Chart Settings",
+    },
   },
   dateFormat: {
     options: SUPPORTED_DATE_FORMATS,
@@ -253,14 +272,6 @@ export const localizationOptions = {
       category: "Localization"
     }
   },
-  locale: {
-    options: SUPPORTED_LOCALES,
-    control: { type: "select" },
-    description: 'The locale to be used within the widget. Changes how dates and currencies are rendered.',
-    table: {
-      category: "Localization"
-    }
-  }
 }
 
 export const DATE_RANGE_OPTIONS = [
@@ -339,7 +350,7 @@ export const getDateRange = (option: DateRangeOptions, enableToday: boolean): Da
 
 type DateRangeTexts = Record<DateRangeOptions, string>; 
 
-const dateRangeSelectText:Record<SupportedLocales, DateRangeTexts> = {
+const dateRangeSelectText:Record<SupportedLocale, DateRangeTexts> = {
   'en-US': {
     'last7Days': 'Last 7 Days',
     'last30Days': 'Last 30 Days',
@@ -492,7 +503,7 @@ const dateRangeSelectText:Record<SupportedLocales, DateRangeTexts> = {
   }
 };
 
-export const getLocalizedDateRangeSelectorText = (option:DateRangeOptions, locale:SupportedLocales='en-US') => {
+export const getLocalizedDateRangeSelectorText = (option:DateRangeOptions, locale:SupportedLocale='en-US') => {
   return dateRangeSelectText?.[locale]?.[option] ?? dateRangeSelectText['en-US']?.[option] ?? 'unknown';
 }
 
@@ -517,3 +528,31 @@ export const hasMultipleYears = (dates: string[]|Date[]): boolean => {
   // Check if there are multiple unique years
   return uniqueYears.size > 1;
 };
+
+
+/**
+ * Creates and returns a value formatter function based on the given formatting options.
+ *
+ * @param {ValueFormat} valueFormat - The type of value formatting to apply. Can be one of 'localized', 'abbreviated', or 'currency'.
+ * @param {SupportedLocale} locale - The locale to use for formatting the value.
+ * @param {SupportedCurrency} currency - The currency to use when the value format is 'currency'.
+ * @returns {ValueFormatter} A value formatter function that takes a number and returns it as a formatted string according to the specified options.
+ *
+ * @example
+ * const formatter = createValueFormatter('currency', 'en-US', 'USD');
+ * const formattedValue = formatter(1000);  // Output: "$1,000"
+ */
+export const createValueFormatter = (valueFormat:ValueFormat, locale:SupportedLocale, currency:SupportedCurrency):ValueFormatter => {
+  return (value:number)=> {
+    if(valueFormat === 'localized') {
+      return formatNumberByLocale(value,locale,false);
+    }
+    if(valueFormat === 'abbreviated') {
+      return formatNumberByLocale(value,locale,true);
+    }
+    if(valueFormat === 'currency') {
+      return formatCurrency(value, currency, locale, true);
+    }
+    return value+'';
+  };
+}
