@@ -239,7 +239,7 @@ export function formatDate(date: Date | string, dateFormat: DateFormat = 'defaul
   }
 }
 
-export const localizationOptions = {
+export const localizationArgTypes = {
   locale: {
     options: SUPPORTED_LOCALES,
     control: { type: "select" },
@@ -259,9 +259,9 @@ export const localizationOptions = {
   valueFormat: {
     options: SUPPORTED_VALUE_FORMATS,
     control: {type: 'select'},
-    description: "Controls the format of the x-axis values.",
+    description: "Controls how values are formatted within the widget. Default is based on provided locale.",
     table: {
-      category: "Chart Settings",
+      category: "Localization",
     },
   },
   dateFormat: {
@@ -272,7 +272,7 @@ export const localizationOptions = {
       category: "Localization"
     }
   },
-}
+};
 
 export const DATE_RANGE_OPTIONS = [
   'last7Days',
