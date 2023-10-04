@@ -17,7 +17,7 @@ interface Props {
 export const WidgetCardNode = memo((props: Props) => {
   const { Component, args } = props.data
   const { minHeight, minWidth } = props;
-  
+
   return (
     <>
       <NodeResizer
@@ -25,7 +25,10 @@ export const WidgetCardNode = memo((props: Props) => {
         minWidth={minWidth}
         isVisible={true}
       />
-    <div>
+    <div
+        role="button"
+        className={'widget-card'}
+      >
      <Component {...args} />
     </div>
     </>

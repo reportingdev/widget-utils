@@ -1,0 +1,6 @@
+.widget-card {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 24px;
+}
