@@ -1,8 +1,9 @@
 import { enUS, enGB, es, fr, de, it, nl, ru, zhCN, ja, ko, ar, hi, pt, sv } from 'date-fns/locale';
-import { Locale, format, startOfWeek,subDays,startOfQuarter,startOfYear,startOfMonth,subMonths,subYears,endOfMonth,endOfQuarter,subQuarters,endOfYear } from 'date-fns'
+import { Locale, format, startOfWeek, subDays, startOfQuarter, startOfYear, startOfMonth, subMonths, subYears, endOfMonth, endOfQuarter, subQuarters, endOfYear } from 'date-fns'
+import cc from 'currency-codes-ts';
 
 const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'es', 'fr', 'de', 'it', 'nl', 'ru', 'zh-CN', 'ja', 'ko', 'ar', 'hi', 'pt', 'sv'];
-const SUPPORTED_CURRENCIES = ['USD', 'GBP', 'EUR', 'CNY', 'JPY', 'KRW', 'INR', 'SEK'];
+const SUPPORTED_CURRENCIES = cc.codes()
 const SUPPORTED_DATE_FORMATS = ['default', 'shortMonthDay', 'shortMonthDayYear', 'longMonthDay', 'longMonthDayYear', 'us', 'european', 'asian'];
 const SUPPORTED_VALUE_FORMATS = ['none', 'localized', 'abbreviated', 'currency']
 
@@ -40,20 +41,20 @@ export const shorthandDates = (dateString: string) => {
  * formatCurrency(1200, "USD", "en-US", true);   // "$1.2k"
  * formatCurrency(1200000, "EUR", "de", true); // "1,2M €"
  */
-export function formatCurrency(amount: number, currency: SupportedCurrency = "USD", locale: SupportedLocale = 'en-US',shouldAbbreviate: boolean=false): string {
+export function formatCurrency(amount: number, currency: SupportedCurrency = "USD", locale: SupportedLocale = 'en-US', shouldAbbreviate: boolean = false): string {
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
   });
 
-  const removeTrailingZeros = (formattedCurrency:string) => {
+  const removeTrailingZeros = (formattedCurrency: string) => {
     return formattedCurrency.replace(/(\.00|,00)(?=\s*[^0-9]|$)/g, '');
   }
 
   if (!shouldAbbreviate) {
     return removeTrailingZeros(formatter.format(amount));
   }
-  
+
   const currencyParts = formatter.formatToParts(1);
   const currencySymbol = currencyParts.find(part => part.type === 'currency')?.value || '';
   const isSymbolFirst = currencyParts[0]?.type === 'currency';
@@ -84,8 +85,8 @@ export function formatCurrency(amount: number, currency: SupportedCurrency = "US
     return removeTrailingZeros(formatter.format(amount));
   }
 
-  return isSymbolFirst ? 
-    `${currencySymbol}${formattedAmount}${suffix}` : 
+  return isSymbolFirst ?
+    `${currencySymbol}${formattedAmount}${suffix}` :
     `${formattedAmount}${suffix} ${currencySymbol}`;
 }
 
@@ -105,8 +106,8 @@ export function formatCurrency(amount: number, currency: SupportedCurrency = "US
  * formatNumberByLocale(1200000, 'de-DE', true); // "1,2M"
  */
 export function formatNumberByLocale(
-  num: number, 
-  locale: SupportedLocale = 'en-US', 
+  num: number,
+  locale: SupportedLocale = 'en-US',
   shouldAbbreviate: boolean = false
 ): string {
   if (num < 1000 || !shouldAbbreviate) {
@@ -258,7 +259,7 @@ export const localizationArgTypes = {
   },
   valueFormat: {
     options: SUPPORTED_VALUE_FORMATS,
-    control: {type: 'select'},
+    control: { type: 'select' },
     description: "Controls how values are formatted within the widget. Default is based on provided locale.",
     table: {
       category: "Localization",
@@ -348,9 +349,9 @@ export const getDateRange = (option: DateRangeOptions, enableToday: boolean): Da
   return { from, to };
 };
 
-type DateRangeTexts = Record<DateRangeOptions, string>; 
+type DateRangeTexts = Record<DateRangeOptions, string>;
 
-const dateRangeSelectText:Record<SupportedLocale, DateRangeTexts> = {
+const dateRangeSelectText: Record<SupportedLocale, DateRangeTexts> = {
   'en-US': {
     'last7Days': 'Last 7 Days',
     'last30Days': 'Last 30 Days',
@@ -503,7 +504,7 @@ const dateRangeSelectText:Record<SupportedLocale, DateRangeTexts> = {
   }
 };
 
-export const getLocalizedDateRangeSelectorText = (option:DateRangeOptions, locale:SupportedLocale='en-US') => {
+export const getLocalizedDateRangeSelectorText = (option: DateRangeOptions, locale: SupportedLocale = 'en-US') => {
   return dateRangeSelectText?.[locale]?.[option] ?? dateRangeSelectText['en-US']?.[option] ?? 'unknown';
 }
 
@@ -518,7 +519,7 @@ export const getLocalizedDateRangeSelectorText = (option:DateRangeOptions, local
  * hasMultipleYears(['2023-01-01', '2024-01-01']);  // true
  * hasMultipleYears([new Date('2023-01-01'), new Date('2023-12-31')]);  // false
  */
-export const hasMultipleYears = (dates: string[]|Date[]): boolean => {
+export const hasMultipleYears = (dates: string[] | Date[]): boolean => {
   // Extract years from the dates
   const years = dates.map((date) => new Date(date).getUTCFullYear());
 
@@ -542,17 +543,17 @@ export const hasMultipleYears = (dates: string[]|Date[]): boolean => {
  * const formatter = createValueFormatter('currency', 'en-US', 'USD');
  * const formattedValue = formatter(1000);  // Output: "$1,000"
  */
-export const createValueFormatter = (valueFormat:ValueFormat, locale:SupportedLocale, currency:SupportedCurrency):ValueFormatter => {
-  return (value:number)=> {
-    if(valueFormat === 'localized') {
-      return formatNumberByLocale(value,locale,false);
+export const createValueFormatter = (valueFormat: ValueFormat, locale: SupportedLocale, currency: SupportedCurrency): ValueFormatter => {
+  return (value: number) => {
+    if (valueFormat === 'localized') {
+      return formatNumberByLocale(value, locale, false);
     }
-    if(valueFormat === 'abbreviated') {
-      return formatNumberByLocale(value,locale,true);
+    if (valueFormat === 'abbreviated') {
+      return formatNumberByLocale(value, locale, true);
     }
-    if(valueFormat === 'currency') {
+    if (valueFormat === 'currency') {
       return formatCurrency(value, currency, locale, true);
     }
-    return value+'';
+    return value + '';
   };
 }

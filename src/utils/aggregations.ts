@@ -1,3 +1,4 @@
+import { Values } from "../types/widget";
 
 const sum = (values:number[])=>values.reduce((partialSum:number, a:number) => partialSum + a, 0);
 const average = (values:number[])=>values.reduce((partialSum:number, a:number) => partialSum + a, 0) / values.length;

@@ -1,7 +1,7 @@
 /**
  * The primary widget object containing all necessary props to power the widget.
  */
-type Widget = {
+export type Widget = {
   /** 
    * Data used to power the widget. Shows up as `fields` in our dashboard editor.
    */
@@ -34,7 +34,7 @@ type Widget = {
 /**
 * Data object containing datasets and an optional dimension.
 */
-type WidgetData = {
+export type WidgetData = {
   /**
    * Array of datasets used to visualize data.
    */
@@ -48,7 +48,7 @@ type WidgetData = {
 /**
 * Dataset type containing all necessary data to power a visualization.
 */
-type Dataset = {
+export type Dataset = {
   /**
    * The label of the dataset. Should be used as the value for any labels or tooltips in the widget.
    */
@@ -80,17 +80,17 @@ type Dataset = {
 /**
 * Enum for the aggregation type.
 */
-type AggregationType = 'total' | 'average' | 'count' | 'min' | 'max' | 'mode';
+export type AggregationType = 'total' | 'average' | 'count' | 'min' | 'max' | 'mode';
 
 /**
 * Enum for the data type.
 */
-type DataType = 'string' | 'number' | 'date';
+export type DataType = 'string' | 'number' | 'date';
 
 /**
 * Object for representing change rates.
 */
-type ChangeRate = {
+export type ChangeRate = {
   /**
    * Decimal value of the percentage change.
    */
@@ -104,14 +104,14 @@ type ChangeRate = {
 /**
 * Union type for values, which could be either numbers or strings.
 */
-type Values = number[] | string[];
+export type Values = number[] | string[];
 
 
 /**
  * The `WidgetConfig` type is used to define the configuration settings for widgets
  * in the dashboard editor.
  */
-type WidgetConfig = {
+export type WidgetConfig = {
   /** 
    * Specifies if the widget utilizes the `data` prop. 
    */
@@ -185,13 +185,13 @@ type WidgetConfig = {
  * }
  * ```
  */
-type SettingsOrder = Record<string, string[]>;
+export type SettingsOrder = Record<string, string[]>;
 
 
 /**
  * An object that maps keys to ActionFieldProps objects.
  */
-type ActionFields = {
+export type ActionFields = {
   /**
    * The key serves as the identifier for each action field.
    */
@@ -201,7 +201,7 @@ type ActionFields = {
 /**
  * Properties for each individual action field.
  */
-type ActionFieldProps = {
+export type ActionFieldProps = {
   /**
    * A description explaining the purpose or role of the action field.
    */

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import './loading.css';
 import { datasetGenerator } from '../../utils/generators';
 import { Oval as Loader } from 'svg-loaders-react'
+import { WidgetData } from '../../types/widget';
 
 //type LoaderVariant = 'spinner' | 'bar' | 'circle';
 

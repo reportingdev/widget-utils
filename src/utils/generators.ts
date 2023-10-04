@@ -1,6 +1,7 @@
 import { random } from 'lodash'
 import { percentageFormatter } from './formatters';
 import { percentageChange } from './formulas';
+import { DataType, Dataset, WidgetData } from '../types/widget';
 
 
 const labelGenerator = () => {

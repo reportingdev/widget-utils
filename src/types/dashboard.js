@@ -1,4 +1,4 @@
-export const dashboard = {
+const dashboard = {
   title: "Dashboard",
   component: null,
   argTypes: {
