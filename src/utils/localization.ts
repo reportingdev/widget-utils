@@ -3,7 +3,7 @@ import { Locale, format, startOfWeek, subDays, startOfQuarter, startOfYear, star
 import cc from 'currency-codes-ts';
 
 const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'es', 'fr', 'de', 'it', 'nl', 'ru', 'zh-CN', 'ja', 'ko', 'ar', 'hi', 'pt', 'sv'];
-const SUPPORTED_CURRENCIES = cc.codes()
+const SUPPORTED_CURRENCIES = cc.codes();
 const SUPPORTED_DATE_FORMATS = ['default', 'shortMonthDay', 'shortMonthDayYear', 'longMonthDay', 'longMonthDayYear', 'us', 'european', 'asian'];
 const SUPPORTED_VALUE_FORMATS = ['none', 'localized', 'abbreviated', 'currency']
 
@@ -292,6 +292,30 @@ interface DateRange {
   to: Date;
 }
 
+
+/**
+ * Gets the current date, with the option to adjust to the start of the day in the local timezone.
+ * By default, the function returns 'today' in UTC. If `localTimezone` is true, it adjusts
+ * the date to the start of the day in the user's local timezone.
+ *
+ * @param {boolean} localTimezone - If true, returns the date adjusted to the local timezone.
+ * @returns {Date} The date object representing today's date, adjusted based on the `localTimezone` parameter.
+ */
+export const getToday = (localTimezone?:boolean):Date => {
+    // Assuming 'today' is in UTC for consistency across different time zones.
+    let today = new Date(new Date().toUTCString());
+
+    // If enableLocalDates is true, adjust 'today' to the start of the day in the user's local time zone.
+    if (localTimezone) {
+      // Subtract the time zone offset of the local time (user's time zone).
+      const timezoneOffset = today.getTimezoneOffset() * 60000;
+      today = new Date(today.getTime() + timezoneOffset);
+      today.setHours(0, 0, 0, 0); // Set time to the start of the day.
+    }
+    return today;
+}
+
+
 /**
  * Gets a date range based on a specified option.
  * Supports various predefined date ranges like 'last7Days', 'last30Days', 'lastWeek', etc.
@@ -306,9 +330,9 @@ interface DateRange {
  * getDateRange('lastWeek', false);  // { from: "2023-09-18T00:00:00.000Z", to: "2023-09-24T00:00:00.000Z" }
  * getDateRange('lastYear', false);  // { from: "2022-01-01T00:00:00.000Z", to: "2022-12-31T00:00:00.000Z" }
  */
-export const getDateRange = (option: DateRangeOptions, enableToday: boolean): DateRange => {
-  const today = new Date();
-  let to = enableToday ? new Date(today) : subDays(today, 1);
+export const getDateRange = (option: DateRangeOptions, enableToday: boolean, localTimezone?:boolean): DateRange => {
+  const today = getToday(localTimezone)
+  let to = enableToday ? today : subDays(today, 1);
   let from: Date | undefined;
 
   switch (option) {

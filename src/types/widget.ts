@@ -19,6 +19,7 @@ export type Widget = {
    * Used for triggering actions and updating variables (e.g., date picker, filters).
    */
   onChange?: Function;
+  onStateChange?: Function;
   /**
    * Used to let the widget know there was an error querying data or loading the report 
    * and that an error UI should be shown.
