@@ -51,8 +51,13 @@ export function formatCurrency(amount: number, currency: SupportedCurrency = "US
     return formattedCurrency.replace(/(\.00|,00)(?=\s*[^0-9]|$)/g, '');
   }
 
+  // Determine if the amount is negative
+  const isNegative = amount < 0;
+  // Work with the absolute value for formatting
+  amount = Math.abs(amount);
+
   if (!shouldAbbreviate) {
-    return removeTrailingZeros(formatter.format(amount));
+    return (isNegative ? '-' : '') + removeTrailingZeros(formatter.format(amount));
   }
 
   const currencyParts = formatter.formatToParts(1);
@@ -78,16 +83,22 @@ export function formatCurrency(amount: number, currency: SupportedCurrency = "US
     suffix = 'k';
   }
 
-  // Check if number is evenly divisible by the various thresholds
   if (amount % divisor === 0 || amount % (divisor / 10) === 0 || amount % (divisor / 100) === 0) {
     formattedAmount = (amount / divisor).toLocaleString(locale);
   } else {
-    return removeTrailingZeros(formatter.format(amount));
+    // If the amount isn't neatly divisible, abbreviate to two decimal places and remove trailing zeros.
+    formattedAmount = removeTrailingZeros((amount / divisor).toLocaleString(locale, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 2
+    }));
   }
 
-  return isSymbolFirst ?
-    `${currencySymbol}${formattedAmount}${suffix}` :
-    `${formattedAmount}${suffix} ${currencySymbol}`;
+
+  
+  // Append negative sign if necessary
+  return isNegative ? 
+    `-${isSymbolFirst ? currencySymbol : ''}${formattedAmount}${suffix}${isSymbolFirst ? '' : ` ${currencySymbol}`}` :
+    `${isSymbolFirst ? currencySymbol : ''}${formattedAmount}${suffix}${isSymbolFirst ? '' : ` ${currencySymbol}`}`;
 }
 
 /**
@@ -301,20 +312,16 @@ interface DateRange {
  * @param {boolean} localTimezone - If true, returns the date adjusted to the local timezone.
  * @returns {Date} The date object representing today's date, adjusted based on the `localTimezone` parameter.
  */
-export const getToday = (localTimezone?:boolean):Date => {
-    // Assuming 'today' is in UTC for consistency across different time zones.
-    let today = new Date(new Date().toUTCString());
-
-    // If enableLocalDates is true, adjust 'today' to the start of the day in the user's local time zone.
-    if (localTimezone) {
-      // Subtract the time zone offset of the local time (user's time zone).
-      const timezoneOffset = today.getTimezoneOffset() * 60000;
-      today = new Date(today.getTime() + timezoneOffset);
-      today.setHours(0, 0, 0, 0); // Set time to the start of the day.
-    }
-    return today;
+export function getToday(localTimezone?: boolean): Date {
+  const now = new Date();
+  if (localTimezone) {
+     // Create a new Date object set to midnight (00:00:00) of the current date in local time
+     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  } else {
+    // Create a new Date object set to midnight (00:00:00) UTC of the current date
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  }
 }
-
 
 /**
  * Gets a date range based on a specified option.
