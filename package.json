@@ -1,11 +1,11 @@
 {
   "name": "@reportingdev/widget-utils",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "This repo contains utility functions and components used across widget repos.",
   "scripts": {
     "prebuild": "tsc",
     "build": "rollup -c",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "test": "tsc; node --experimental-vm-modules node_modules/.bin/jest"
   },
   "main": "dist/bundle.cjs.js",
   "module": "dist/bundle.esm.js",

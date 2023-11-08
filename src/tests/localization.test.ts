@@ -1,5 +1,18 @@
 import * as sinon from 'sinon';
-import { formatCurrency, serializeDate } from '../utils/localization';
+import { formatCurrency, serializeDate, getDateRange, hasMultipleYears } from '../utils/localization';
+import {
+  subDays,
+  startOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfQuarter,
+  endOfQuarter,
+  startOfYear,
+  endOfYear,
+  subMonths,
+  subQuarters,
+  subYears
+} from 'date-fns';
 
 
 describe('serializeDate', () => {
@@ -50,6 +63,140 @@ describe('serializeDate', () => {
     expect(() => serializeDate(date, 'unsupportedFormat' as any)).toThrow('Unsupported format specified');
   });
 });
+
+
+describe('getDateRange', () => {
+  let clock: sinon.SinonFakeTimers;
+  const mockToday = new Date('2023-10-10T00:00:00.000Z');
+
+  beforeAll(() => {
+    // Use Sinon to fake the system clock
+    clock = sinon.useFakeTimers(mockToday.getTime());
+  });
+
+  afterAll(() => {
+    // Restore the real system clock
+    clock.restore();
+  });
+
+
+  it('should return the last 7 days range including today', () => {
+    const result = getDateRange('last7Days', true);
+    expect(result).toEqual({
+      from: subDays(mockToday, 6),
+      to: mockToday,
+    });
+  });
+
+  it('should return the last 7 days range excluding today', () => {
+    const result = getDateRange('last7Days', false);
+    expect(result).toEqual({
+      from: subDays(mockToday, 7),
+      to: subDays(mockToday, 1),
+    });
+  });
+
+  it('should return the last 30 days range including today', () => {
+    const result = getDateRange('last30Days', true);
+    expect(result).toEqual({
+      from: subDays(mockToday, 29),
+      to: mockToday,
+    });
+  });
+
+  it('should return the last 30 days range excluding today', () => {
+    const result = getDateRange('last30Days', false);
+    expect(result).toEqual({
+      from: subDays(mockToday, 30),
+      to: subDays(mockToday, 1),
+    });
+  });
+
+  it('should return the last week range', () => {
+    const startLastWeek = startOfWeek(subDays(mockToday, 7));
+    const endLastWeek = subDays(startOfWeek(mockToday), 1);
+    const result = getDateRange('lastWeek', false);
+    expect(result).toEqual({
+      from: startLastWeek,
+      to: endLastWeek,
+    });
+  });
+
+  it('should return the last month range', () => {
+    const result = getDateRange('lastMonth', false);
+    expect(result).toEqual({
+      from: startOfMonth(subMonths(mockToday, 1)),
+      to: endOfMonth(subMonths(mockToday, 1)),
+    });
+  });
+
+  it('should return the last quarter range', () => {
+    const result = getDateRange('lastQuarter', false);
+    expect(result).toEqual({
+      from: startOfQuarter(subQuarters(mockToday, 1)),
+      to: endOfQuarter(subQuarters(mockToday, 1)),
+    });
+  });
+
+  it('should return the last year range', () => {
+    const result = getDateRange('lastYear', false);
+    expect(result).toEqual({
+      from: startOfYear(subYears(mockToday, 1)),
+      to: endOfYear(subYears(mockToday, 1)),
+    });
+  });
+
+  it('should return the MTD range including today', () => {
+    const result = getDateRange('mtd', true);
+    expect(result).toEqual({
+      from: startOfMonth(mockToday),
+      to: mockToday,
+    });
+  });
+
+  it('should return the YTD range including today', () => {
+    const result = getDateRange('ytd', true);
+    expect(result).toEqual({
+      from: startOfYear(mockToday),
+      to: mockToday,
+    });
+  });
+
+  // Add more tests as per your requirements and edge cases
+});
+
+describe('hasMultipleYears', () => {
+  it('should return false for an array with dates from the same year', () => {
+    const dates = [
+      '2023-01-01',
+      new Date('2023-05-15'),
+      '2023-12-31T23:59:59.999Z'
+    ];
+    expect(hasMultipleYears(dates)).toBe(false);
+  });
+
+  it('should return true for an array with dates from different years', () => {
+    const dates = [
+      '2022-12-31',
+      new Date('2023-01-01'),
+      '2024-01-01T00:00:00.000Z'
+    ];
+    expect(hasMultipleYears(dates)).toBe(true);
+  });
+
+  it('should return false for an array with a single date', () => {
+    const dates = ['2023-06-01'];
+    expect(hasMultipleYears(dates)).toBe(false);
+  });
+
+  it('should return false for an empty array', () => {
+    const dates:string[] = [];
+    expect(hasMultipleYears(dates)).toBe(false);
+  });
+
+  // Add more test cases if necessary, such as invalid date formats, etc.
+});
+
 
 
 describe('formatCurrency', () => {

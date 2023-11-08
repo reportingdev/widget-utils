@@ -587,7 +587,7 @@ export const getLocalizedDateRangeSelectorText = (option: DateRangeOptions, loca
  * hasMultipleYears(['2023-01-01', '2024-01-01']);  // true
  * hasMultipleYears([new Date('2023-01-01'), new Date('2023-12-31')]);  // false
  */
-export const hasMultipleYears = (dates: string[] | Date[]): boolean => {
+export const hasMultipleYears = (dates: (string | Date)[]): boolean => {
   // Extract years from the dates
   const years = dates.map((date) => new Date(date).getUTCFullYear());
 
