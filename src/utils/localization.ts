@@ -12,6 +12,7 @@ export type SupportedCurrency = typeof SUPPORTED_CURRENCIES[number];
 export type DateFormat = typeof SUPPORTED_DATE_FORMATS[number];
 export type ValueFormat = typeof SUPPORTED_VALUE_FORMATS[number];
 export type ValueFormatter = (value: number) => string;
+export type SerializedDateOption = 'iso8601' | 'isoDateLocal' | 'isoDateUTC' | 'unixTimestamp' | 'rfc2822';
 
 /**
  * @deprecated Use `formatDate` instead.
@@ -303,23 +304,59 @@ interface DateRange {
   to: Date;
 }
 
-
 /**
- * Gets the current date, with the option to adjust to the start of the day in the local timezone.
- * By default, the function returns 'today' in UTC. If `localTimezone` is true, it adjusts
- * the date to the start of the day in the user's local timezone.
- *
- * @param {boolean} localTimezone - If true, returns the date adjusted to the local timezone.
- * @returns {Date} The date object representing today's date, adjusted based on the `localTimezone` parameter.
+ * Converts a JavaScript Date object to a specified standardized string format.
+ * This is useful for preparing dates for database storage, API transmission, or any other case
+ * where a standardized date format is required.
+ * 
+ * @param {Date} date - The date object to be serialized.
+ * @param {'iso8601' | 'isoDateLocal' | 'isoDateUTC' | 'unixTimestamp' | 'rfc2822'} format - The format to serialize the date into.
+ *        'iso8601' returns the date in ISO 8601 format with timezone information,
+ *        'isoDateLocal' returns the local date in ISO 8601 format without time and timezone,
+ *        'isoDateUTC' returns the UTC date in ISO 8601 format without time and timezone,
+ *        'unixTimestamp' returns the date as a UNIX timestamp string.
+ *        'rfc2822' returns the date as a RFC 2822 string.
+ * @returns {string} - The serialized date in the specified format.
+ *        Returns a string for 'iso' and 'iso-date-only' formats, and a number for the 'timestamp' format.
+ * @throws {Error} - Throws an error if the input date is invalid.
+ * 
+ * @example
+ * // Serialize a date to an ISO string with timezone information
+ * serializeDate(new Date(), 'iso8601'); // '2023-01-28T14:38:00.000Z'
+ * 
+ * @example
+ * // Serialize a date to an ISO string with only date information
+ * serializeDate(new Date(), 'isoDateLocal'); // '2023-01-28'
+ * 
+ * @example
+ * // Serialize a date to a UNIX timestamp
+ * serializeDate(new Date(), 'unixTimestamp'); // '1674917480000'
  */
-export function getToday(localTimezone?: boolean): Date {
-  const now = new Date();
-  if (localTimezone) {
-     // Create a new Date object set to midnight (00:00:00) of the current date in local time
-     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-  } else {
-    // Create a new Date object set to midnight (00:00:00) UTC of the current date
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+
+export const serializeDate = (date: Date, format: SerializedDateOption): string => {
+  switch (format) {
+    case 'iso8601':
+      // ISO 8601 with timezone (e.g., 2023-11-07T20:00:00Z)
+      return date.toISOString();
+
+    case 'isoDateLocal':
+      // ISO Date only, local (e.g., 2023-11-07)
+      return date.toISOString().split('T')[0];
+
+    case 'isoDateUTC':
+      // ISO Date only, UTC (e.g., 2023-11-07)
+      return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString().split('T')[0];
+
+    case 'unixTimestamp':
+      // Unix timestamp in milliseconds
+      return date.getTime().toString();
+
+    case 'rfc2822':
+      // RFC 2822 format
+      return date.toUTCString();
+
+    default:
+      throw new Error('Unsupported format specified');
   }
 }
 
@@ -337,8 +374,8 @@ export function getToday(localTimezone?: boolean): Date {
  * getDateRange('lastWeek', false);  // { from: "2023-09-18T00:00:00.000Z", to: "2023-09-24T00:00:00.000Z" }
  * getDateRange('lastYear', false);  // { from: "2022-01-01T00:00:00.000Z", to: "2022-12-31T00:00:00.000Z" }
  */
-export const getDateRange = (option: DateRangeOptions, enableToday: boolean, localTimezone?:boolean): DateRange => {
-  const today = getToday(localTimezone)
+export const getDateRange = (option: DateRangeOptions, enableToday: boolean): DateRange => {
+  const today = new Date();
   let to = enableToday ? today : subDays(today, 1);
   let from: Date | undefined;
 
@@ -550,7 +587,7 @@ export const getLocalizedDateRangeSelectorText = (option: DateRangeOptions, loca
  * hasMultipleYears(['2023-01-01', '2024-01-01']);  // true
  * hasMultipleYears([new Date('2023-01-01'), new Date('2023-12-31')]);  // false
  */
-export const hasMultipleYears = (dates: string[] | Date[]): boolean => {
+export const hasMultipleYears = (dates: (string | Date)[]): boolean => {
   // Extract years from the dates
   const years = dates.map((date) => new Date(date).getUTCFullYear());
 
