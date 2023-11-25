@@ -172,6 +172,7 @@ export type WidgetConfig = {
    * Defines the order in which different settings appear in the editor Sidebar.
    */
   settingsOrder?: SettingsOrder;
+  previewImage?: string;
 };
 
 /**
